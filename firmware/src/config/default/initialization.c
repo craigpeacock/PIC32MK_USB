@@ -133,6 +133,42 @@ SYSTEM_OBJECTS sysObj;
 // Section: Library/Stack Initialization Data
 // *****************************************************************************
 // *****************************************************************************
+/******************************************************
+ * USB Driver Initialization
+ ******************************************************/
+ 
+
+uint8_t __attribute__((aligned(512))) endPointTable0[DRV_USBFS_ENDPOINTS_NUMBER * 32];
+
+
+const DRV_USBFS_INIT drvUSBFSInit0 =
+{
+	 /* Assign the endpoint table */
+    .endpointTable= endPointTable0,
+	/* Interrupt Source for USB module */
+	.interruptSource = INT_SOURCE_USB_1 ,
+   
+    /* USB Controller to operate as USB Device */
+    .operationMode = DRV_USBFS_OPMODE_DEVICE,
+	
+	.operationSpeed = USB_SPEED_FULL,
+ 
+	/* Stop in idle */
+    .stopInIdle = false,
+	
+	    /* Suspend in sleep */
+    .suspendInSleep = false,
+    /* Identifies peripheral (PLIB-level) ID */
+    .usbID = USB_ID_1,
+	
+
+};
+
+
+
+
+
+
 
 
 // *****************************************************************************
@@ -231,6 +267,15 @@ void SYS_Initialize ( void* data )
     sysObj.sysDebug = SYS_DEBUG_Initialize(SYS_DEBUG_INDEX_0, (SYS_MODULE_INIT*)&debugInit);
 
 
+
+
+	 /* Initialize the USB device layer */
+    sysObj.usbDevObject0 = USB_DEVICE_Initialize (USB_DEVICE_INDEX_0 , ( SYS_MODULE_INIT* ) & usbDevInitData0);
+	
+	
+
+	/* Initialize USB Driver */ 
+    sysObj.drvUSBFSObject0 = DRV_USBFS_Initialize(DRV_USBFS_INDEX_0, (SYS_MODULE_INIT *) &drvUSBFSInit0);	
 
 
     APP_Initialize();

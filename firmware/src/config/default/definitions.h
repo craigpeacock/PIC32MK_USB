@@ -52,6 +52,9 @@
 #include "peripheral/clk/plib_clk.h"
 #include "peripheral/gpio/plib_gpio.h"
 #include "peripheral/evic/plib_evic.h"
+#include "usb/usb_chapter_9.h"
+#include "usb/usb_device.h"
+#include "driver/usb/usbfs/drv_usbfs.h"
 #include "system/console/sys_console.h"
 #include "system/console/src/sys_console_uart_definitions.h"
 #include "system/int/sys_int.h"
@@ -182,6 +185,12 @@ Remarks:
 
 typedef struct
 {
+	SYS_MODULE_OBJ  usbDevObject0;
+
+
+	SYS_MODULE_OBJ  drvUSBFSObject0;
+
+
     SYS_MODULE_OBJ  sysConsole0;
 
     SYS_MODULE_OBJ  sysDebug;
@@ -194,6 +203,8 @@ typedef struct
 // Section: extern declarations
 // *****************************************************************************
 // *****************************************************************************
+
+extern const USB_DEVICE_INIT usbDevInitData0; 
 
 
 
