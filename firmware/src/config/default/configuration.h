@@ -111,6 +111,35 @@ extern "C" {
 // Section: Middleware & Other Library Configuration
 // *****************************************************************************
 // *****************************************************************************
+#define USB_DEVICE_INSTANCES_NUMBER                         1
+
+/* EP0 size in bytes */
+#define USB_DEVICE_EP0_BUFFER_SIZE                          64
+
+/* The USB Device Layer will not initialize the USB Driver */
+#define USB_DEVICE_DRIVER_INITIALIZE_EXPLICIT
+
+/* Enable SOF Events */
+#define USB_DEVICE_SOF_EVENT_ENABLE
+
+
+/* Number Full Speed USB Driver instances */ 
+#define DRV_USBFS_INSTANCES_NUMBER                       1
+
+/* Interrupt mode enabled */
+#define DRV_USBFS_INTERRUPT_MODE                          true
+
+/* Enables Device Support */
+#define DRV_USBFS_DEVICE_SUPPORT                          true
+
+#define DRV_USBFS_ENDPOINTS_NUMBER                        1
+
+/* Disable Host Support */
+#define DRV_USBFS_HOST_SUPPORT                            false
+
+/* Alignment for buffers that are submitted to USB Driver*/ 
+#define USB_ALIGN  CACHE_ALIGN
+
 
 
 // *****************************************************************************
