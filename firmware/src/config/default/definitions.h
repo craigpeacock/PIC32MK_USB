@@ -48,19 +48,22 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include "peripheral/uart/plib_uart1.h"
 #include "peripheral/clk/plib_clk.h"
 #include "peripheral/gpio/plib_gpio.h"
 #include "peripheral/evic/plib_evic.h"
 #include "usb/usb_chapter_9.h"
 #include "usb/usb_device.h"
 #include "driver/usb/usbfs/drv_usbfs.h"
+#include "usb/usb_device_cdc.h"
+#include "usb/usb_cdc.h"
+#include "peripheral/uart/plib_uart1.h"
 #include "system/console/sys_console.h"
 #include "system/console/src/sys_console_uart_definitions.h"
 #include "system/int/sys_int.h"
 #include "osal/osal.h"
 #include "system/debug/sys_debug.h"
 #include "app.h"
+#include "cdc.h"
 
 
 
@@ -191,9 +194,9 @@ typedef struct
 	SYS_MODULE_OBJ  drvUSBFSObject0;
 
 
-    SYS_MODULE_OBJ  sysConsole0;
-
     SYS_MODULE_OBJ  sysDebug;
+
+    SYS_MODULE_OBJ  sysConsole0;
 
 
 } SYSTEM_OBJECTS;

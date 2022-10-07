@@ -176,6 +176,15 @@ const DRV_USBFS_INIT drvUSBFSInit0 =
 // Section: System Initialization
 // *****************************************************************************
 // *****************************************************************************
+
+const SYS_DEBUG_INIT debugInit =
+{
+    .moduleInit = {0},
+    .errorLevel = SYS_DEBUG_GLOBAL_ERROR_LEVEL,
+    .consoleIndex = 0,
+};
+
+
 // <editor-fold defaultstate="collapsed" desc="SYS_CONSOLE Instance 0 Initialization Data">
 
 
@@ -207,15 +216,6 @@ const SYS_CONSOLE_INIT sysConsole0Init =
 
 
 // </editor-fold>
-
-
-const SYS_DEBUG_INIT debugInit =
-{
-    .moduleInit = {0},
-    .errorLevel = SYS_DEBUG_GLOBAL_ERROR_LEVEL,
-    .consoleIndex = 0,
-};
-
 
 
 
@@ -262,10 +262,10 @@ void SYS_Initialize ( void* data )
 
 
 
-    sysObj.sysConsole0 = SYS_CONSOLE_Initialize(SYS_CONSOLE_INDEX_0, (SYS_MODULE_INIT *)&sysConsole0Init);
-
     sysObj.sysDebug = SYS_DEBUG_Initialize(SYS_DEBUG_INDEX_0, (SYS_MODULE_INIT*)&debugInit);
 
+
+    sysObj.sysConsole0 = SYS_CONSOLE_Initialize(SYS_CONSOLE_INDEX_0, (SYS_MODULE_INIT *)&sysConsole0Init);
 
 
 
@@ -279,6 +279,7 @@ void SYS_Initialize ( void* data )
 
 
     APP_Initialize();
+    CDC_Initialize();
 
 
     EVIC_Initialize();

@@ -146,6 +146,7 @@ USB_DEVICE_EVENT_RESPONSE APP_USBDeviceEventHandler
             {
                 SYS_DEBUG_PRINT(SYS_ERROR_INFO, "USB Device Configured\r\n");
                 appData.deviceIsConfigured = true;
+                USB_DEVICE_CDC_EventHandlerSet(USB_DEVICE_CDC_INDEX_0, USBDeviceCDCEventHandler, 0);
                 // Device is enumerated. Register here the USB Function Driver Event Handler function.
             }
             break;

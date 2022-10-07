@@ -24,28 +24,28 @@ children:
         - type: Values
           children:
           - type: Dynamic
-            attributes: {id: usb_device_0, value: '9'}
+            attributes: {id: usb_device_0, value: '67'}
       - type: Integer
         attributes: {id: CONFIG_USB_DEVICE_ENDPOINTS_NUMBER}
         children:
         - type: Values
           children:
           - type: Dynamic
-            attributes: {id: usb_device_0, value: '-1'}
+            attributes: {id: usb_device_0, value: '2'}
       - type: Integer
         attributes: {id: CONFIG_USB_DEVICE_FUNCTIONS_NUMBER}
         children:
         - type: Values
           children:
           - type: Dynamic
-            attributes: {id: usb_device_0, value: '0'}
+            attributes: {id: usb_device_0, value: '1'}
       - type: Integer
         attributes: {id: CONFIG_USB_DEVICE_INTERFACES_NUMBER}
         children:
         - type: Values
           children:
           - type: Dynamic
-            attributes: {id: usb_device_0, value: '0'}
+            attributes: {id: usb_device_0, value: '2'}
       - type: Boolean
         attributes: {id: CONFIG_USB_DEVICE_MSD_DISK_IMAGE}
         children:
@@ -59,21 +59,21 @@ children:
         - type: Values
           children:
           - type: Dynamic
-            attributes: {id: usb_device_0, value: '0x0053'}
+            attributes: {id: usb_device_0, value: '0x000A'}
       - type: Combo
         attributes: {id: CONFIG_USB_DEVICE_PRODUCT_ID_SELECTION_IDX0}
         children:
         - type: Values
           children:
           - type: User
-            attributes: {value: vendor_demo}
+            attributes: {value: cdc_com_port_single_demo}
       - type: String
         attributes: {id: CONFIG_USB_DEVICE_PRODUCT_STRING_DESCRIPTOR}
         children:
         - type: Values
           children:
           - type: Dynamic
-            attributes: {id: usb_device_0, value: Simple WinUSB Device Demo}
+            attributes: {id: usb_device_0, value: Simple CDC Device Demo}
       - type: String
         attributes: {id: USB_DEVICE_INDEX}
         children:
@@ -92,6 +92,19 @@ children:
             - {type: Value, value: 'false'}
     - type: Attachments
       children:
+      - type: DirectCapability
+        attributes: {id: USB Device}
+        children:
+        - type: Attributes
+          children:
+          - type: String
+            attributes: {id: targetComponentID}
+            children:
+            - {type: Value, value: usb_device_cdc_0}
+          - type: String
+            attributes: {id: targetAttachmentID}
+            children:
+            - {type: Value, value: usb_device_dependency}
       - type: DirectDependency
         attributes: {id: usb_driver_dependency}
         children:
