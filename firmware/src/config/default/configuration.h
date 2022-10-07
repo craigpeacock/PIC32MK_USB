@@ -79,6 +79,13 @@ extern "C" {
 // Section: System Service Configuration
 // *****************************************************************************
 // *****************************************************************************
+
+#define SYS_DEBUG_ENABLE
+#define SYS_DEBUG_GLOBAL_ERROR_LEVEL       SYS_ERROR_DEBUG
+#define SYS_DEBUG_BUFFER_DMA_READY
+#define SYS_DEBUG_USE_CONSOLE
+
+
 #define SYS_CONSOLE_DEVICE_MAX_INSTANCES   			1
 #define SYS_CONSOLE_UART_MAX_INSTANCES 	   			1
 #define SYS_CONSOLE_USB_CDC_MAX_INSTANCES 	   		0
@@ -88,13 +95,6 @@ extern "C" {
 #define SYS_CONSOLE_INDEX_0                       0
 
 
-
-
-
-#define SYS_DEBUG_ENABLE
-#define SYS_DEBUG_GLOBAL_ERROR_LEVEL       SYS_ERROR_DEBUG
-#define SYS_DEBUG_BUFFER_DMA_READY
-#define SYS_DEBUG_USE_CONSOLE
 
 
 
@@ -132,13 +132,22 @@ extern "C" {
 /* Enables Device Support */
 #define DRV_USBFS_DEVICE_SUPPORT                          true
 
-#define DRV_USBFS_ENDPOINTS_NUMBER                        1
+#define DRV_USBFS_ENDPOINTS_NUMBER                        3
 
 /* Disable Host Support */
 #define DRV_USBFS_HOST_SUPPORT                            false
 
 /* Alignment for buffers that are submitted to USB Driver*/ 
 #define USB_ALIGN  CACHE_ALIGN
+
+/* Maximum instances of CDC function driver */
+#define USB_DEVICE_CDC_INSTANCES_NUMBER                     1
+
+
+/* CDC Transfer Queue Size for both read and
+   write. Applicable to all instances of the
+   function driver */
+#define USB_DEVICE_CDC_QUEUE_DEPTH_COMBINED                 3
 
 
 

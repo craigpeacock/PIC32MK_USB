@@ -91,6 +91,9 @@ void SYS_Tasks ( void )
         /* Call Application task APP. */
     APP_Tasks();
 
+    /* Call Application task CDC. */
+    CDC_Tasks();
+
 
 
 
