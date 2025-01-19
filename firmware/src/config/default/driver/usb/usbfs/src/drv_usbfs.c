@@ -51,6 +51,8 @@ SUBSTITUTE  GOODS,  TECHNOLOGY,  SERVICES,  OR  ANY  CLAIMS  BY  THIRD   PARTIES
 
 #include "configuration.h"
 #include "driver/usb/usbfs/src/drv_usbfs_local.h"
+#include "interrupts.h"
+
 
 // *****************************************************************************
 // *****************************************************************************
@@ -62,7 +64,7 @@ SUBSTITUTE  GOODS,  TECHNOLOGY,  SERVICES,  OR  ANY  CLAIMS  BY  THIRD   PARTIES
  * Hardware instance, endpoint table and client object
  * lumped together as group to save memory.
  ******************************************************/
-DRV_USBFS_GROUP gDrvUSBGroup[DRV_USBFS_INSTANCES_NUMBER];
+static DRV_USBFS_GROUP gDrvUSBGroup[DRV_USBFS_INSTANCES_NUMBER];
 
 // *****************************************************************************
 // *****************************************************************************
@@ -71,6 +73,9 @@ DRV_USBFS_GROUP gDrvUSBGroup[DRV_USBFS_INSTANCES_NUMBER];
 // *****************************************************************************
 
 // *****************************************************************************
+/* MISRA C-2012 Rule 11.3, Rule 11.6 and Rule 11.8 . Deviation record ID -  
+   H3_USB_MISRAC_2012_R_11_3_DR_1, H3_USB_MISRAC_2012_R_11_6_DR_1,
+   H3_USB_MISRAC_2012_R_11_8_DR_1*/
 /* Function:
     SYS_MODULE_OBJ DRV_USBFS_Initialize
     ( 
@@ -123,7 +128,7 @@ SYS_MODULE_OBJ DRV_USBFS_Initialize
                 /* Populate the driver instance object with required data */
                 pUSBDrvObj->status = SYS_STATUS_BUSY;
                 pUSBDrvObj->usbID = usbID;
-                pUSBDrvObj->operationMode = pusbInit->operationMode;
+                pUSBDrvObj->operationMode = (USB_OPMODES)pusbInit->operationMode;
                 pUSBDrvObj->pBDT = (DRV_USBFS_BDT_ENTRY *)(pusbInit->endpointTable);
                 pUSBDrvObj->isOpened = false;
                 pUSBDrvObj->pEventCallBack = NULL;
@@ -170,13 +175,13 @@ SYS_MODULE_OBJ DRV_USBFS_Initialize
                     case DRV_USBFS_OPMODE_DEVICE:
 
                         /* Initialize USB Controller for Device mode */
-                        _DRV_USBFS_DEVICE_INIT(pUSBDrvObj, drvIndex);
+                        M_DRV_USBFS_DEVICE_INIT(pUSBDrvObj, drvIndex);
                         break;
 
                     case DRV_USBFS_OPMODE_HOST:
 
                         /* Initialize USB Controller for Host mode */
-                        _DRV_USBFS_HOST_INIT(pUSBDrvObj, drvIndex, pusbInit);
+                        M_DRV_USBFS_HOST_INIT(pUSBDrvObj, drvIndex, pusbInit);
                         break;
 
                     case DRV_USBFS_OPMODE_OTG:
@@ -218,6 +223,7 @@ SYS_MODULE_OBJ DRV_USBFS_Initialize
     return (returnValue);
 }
 
+
 // *****************************************************************************
 /* Function:
     void DRV_USBFS_Deinitialize( const SYS_MODULE_OBJ object )
@@ -253,7 +259,7 @@ void DRV_USBFS_Deinitialize
             pUSBDrvObj->isOpened = false;
 
             /* Delete the mutex */
-            OSAL_MUTEX_Delete(&pUSBDrvObj->mutexID);
+            (void) OSAL_MUTEX_Delete(&pUSBDrvObj->mutexID);
 
             /* Uninitialize the status*/
             pUSBDrvObj->status = SYS_STATUS_UNINITIALIZED;
@@ -261,8 +267,8 @@ void DRV_USBFS_Deinitialize
             pUSBDrvObj->pEventCallBack = NULL;
 
             /* Clear and disable the interrupts */
-            _DRV_USBFS_InterruptSourceDisable(pUSBDrvObj->interruptSource);
-            _DRV_USBFS_InterruptSourceClear(pUSBDrvObj->interruptSource);
+            (void) M_DRV_USBFS_InterruptSourceDisable(pUSBDrvObj->interruptSource);
+            M_DRV_USBFS_InterruptSourceClear(pUSBDrvObj->interruptSource);
 
             /* Turn off USB module */
             PLIB_USB_Disable(pUSBDrvObj->usbID);
@@ -296,13 +302,13 @@ void DRV_USBFS_Deinitialize
 
 SYS_STATUS DRV_USBFS_Status
 (
-    const SYS_MODULE_OBJ object
+    SYS_MODULE_OBJ object
 )
 {
     SYS_STATUS returnValue = SYS_STATUS_UNINITIALIZED;
 
     /* Check if USB instance object is valid */
-    if((object != SYS_MODULE_OBJ_INVALID) || (object < DRV_USBFS_INSTANCES_NUMBER))
+    if((object != (uintptr_t)SYS_MODULE_OBJ_INVALID) && (object < DRV_USBFS_INSTANCES_NUMBER))
     {
         returnValue = gDrvUSBGroup[object].gDrvUSBObj.status;
     }
@@ -321,7 +327,7 @@ SYS_STATUS DRV_USBFS_Status
     DRV_HANDLE DRV_USBFS_Open
     (
         const SYS_MODULE_INDEX drvIndex,
-        const DRV_IO_INTENT ioIntent 
+        const DRV_IO_INTENT intent 
     )
 
   Summary:
@@ -342,7 +348,7 @@ SYS_STATUS DRV_USBFS_Status
 DRV_HANDLE DRV_USBFS_Open
 (
     const SYS_MODULE_INDEX drvIndex,
-    const DRV_IO_INTENT ioIntent 
+    const DRV_IO_INTENT intent 
 )
 {
     DRV_HANDLE handle = DRV_HANDLE_INVALID;
@@ -451,20 +457,20 @@ void DRV_USBFS_Tasks_ISR
     pUSBDriver->inInterruptContext = true;
 
     /* Clear the interrupt */
-    _DRV_USBFS_InterruptSourceClear(pUSBDriver->interruptSource);
+    M_DRV_USBFS_InterruptSourceClear(pUSBDriver->interruptSource);
    
     switch(pUSBDriver->operationMode)
     {
         case DRV_USBFS_OPMODE_DEVICE:
             
             /* Driver is running in Device Mode */
-            _DRV_USBFS_DEVICE_TASKS_ISR(pUSBDriver);
+            M_DRV_USBFS_DEVICE_TASKS_ISR(pUSBDriver);
             break;
         
         case DRV_USBFS_OPMODE_HOST:
 
             /* Driver is running in Host Mode */
-            _DRV_USBFS_HOST_TASKS_ISR(pUSBDriver);
+            M_DRV_USBFS_HOST_TASKS_ISR(pUSBDriver);
             break;
 
         case DRV_USBFS_OPMODE_OTG:
@@ -485,7 +491,7 @@ void DRV_USBFS_Tasks_ISR
     (
         DRV_HANDLE handle,
         uintptr_t hReferenceData,
-        DRV_USBFS_EVENT_CALLBACK eventCallBack
+        DRV_USBFS_EVENT_CALLBACK myEventCallBack
     )
 
   Summary:
@@ -508,7 +514,7 @@ void DRV_USBFS_ClientEventCallBackSet
 ( 
     DRV_HANDLE handle,
     uintptr_t hReferenceData,
-    DRV_USB_EVENT_CALLBACK eventCallBack 
+    DRV_USB_EVENT_CALLBACK myEventCallBack 
 )
 {
     DRV_USBFS_OBJ * pUSBDrvObj = (DRV_USBFS_OBJ *)handle;
@@ -518,7 +524,7 @@ void DRV_USBFS_ClientEventCallBackSet
     {
         /* Assign event call back and reference data */
         pUSBDrvObj->hClientArg = hReferenceData;
-        pUSBDrvObj->pEventCallBack = eventCallBack;
+        pUSBDrvObj->pEventCallBack = myEventCallBack;
 
         /* If the driver is operating in device mode, this is the time we enable
          * the USB interrupt */
@@ -529,7 +535,7 @@ void DRV_USBFS_ClientEventCallBackSet
             PLIB_USB_OTG_InterruptEnable(pUSBDrvObj->usbID, USB_OTG_INT_SESSION_VALID);
             
             /* Enable the interrupt */
-            _DRV_USBFS_InterruptSourceEnable(pUSBDrvObj->interruptSource);
+            M_DRV_USBFS_InterruptSourceEnable(pUSBDrvObj->interruptSource);
         }
     }
     else
@@ -537,6 +543,8 @@ void DRV_USBFS_ClientEventCallBackSet
         SYS_DEBUG(SYS_ERROR_INFO, "\r\nUSBFS Driver: Bad Client or client closed");
     }
 } 
+
+/* MISRAC 2012 deviation block end */
 // *****************************************************************************
 /* Function:
     void DRV_USBFS_Tasks( SYS_MODULE_OBJ object )
@@ -556,31 +564,32 @@ void DRV_USBFS_ClientEventCallBackSet
 void DRV_USBFS_Tasks(SYS_MODULE_OBJ object)
 {
     /* This driver does not have any non interrupt tasks. When the driver
-     * is configured for polled mode operation, the _DRV_USBFS_Tasks_ISR function
+     * is configured for polled mode operation, the F_DRV_USBFS_Tasks_ISR function
      * will map to DRV_USBFS_Tasks_ISR function. In interrupt mode, this function
      * will be mapped to nothing and hence this function will not have any
      * effect. */
 
-    _DRV_USBFS_Tasks_ISR(object);
+    M_DRV_USBFS_Tasks_ISR(object);
 }
 
-	// *****************************************************************************
+// *****************************************************************************
 /* Function:
     void DRV_USBFS_USB1_Handler(void)
 
   Summary:
     USBFS Peripheral 1 Interrupt Handler 
-	
+    
   Description:
     USBFS Peripheral 1 Interrupt Handler 
 
   Remarks:
-	None 
+    None 
 */
 
-void DRV_USBFS_USB1_Handler(void)
+void __attribute__((used)) DRV_USBFS_USB1_Handler(void)
 {
-	DRV_USBFS_Tasks_ISR(sysObj.drvUSBFSObject0); 
+    DRV_USBFS_Tasks_ISR(sysObj.drvUSBFSObject0); 
 }
+
 
 
